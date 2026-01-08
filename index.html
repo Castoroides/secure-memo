@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>Secure Memo</title>
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #f2f2f2;
+}
+
+.container {
+  max-width: 720px;
+  margin: 30px auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  overflow: hidden;
+  padding: 12px;
+}
+
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  padding: 12px;
+  font-size: 15px;
+  line-height: 1.6;
+  font-family: inherit;
+}
+
+/* ダミー元 */
+#dummySource {
+  height: 120px;
+  margin-bottom: 10px;
+}
+
+/* ツールバー */
+.toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.toolbar button {
+  border: none;
+  background: #e0e0e0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+/* エディタ枠 */
+.editor-wrap {
+  position: relative;
+  height: 260px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+
+/* 表示用 */
+#display {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: none;
+  resize: none;
+  overflow: auto;
+}
+
+/* 入力用 */
+#input {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: none;
+  resize: none;
+  overflow: auto;
+  background: transparent;
+  color: transparent;
+  caret-color: black;
+}
+
+/* ログインバー */
+.loginbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="loginbar">
+    <div id="userLabel">未ログイン</div>
+    <button id="loginBtn">Googleログイン</button>
+  </div>
+
+  <textarea id="dummySource" placeholder="ダミー表示用テキスト"></textarea>
+
+  <div class="toolbar">
+    <button id="toggleBtn">👁 表示</button>
+    <button id="copyBtn">📋 コピー</button>
+  </div>
+
+  <div class="editor-wrap">
+    <textarea id="display" readonly></textarea>
+    <textarea id="input"></textarea>
+  </div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* =======================
+   Firebase 設定（あなたの）
+======================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyBPeOPcaf1WOsnbKA1I5FlrjAXm6tTkGy0",
+  authDomain: "memo-bycastoroides.firebaseapp.com",
+  projectId: "memo-bycastoroides",
+  storageBucket: "memo-bycastoroides.firebasestorage.app",
+  messagingSenderId: "833306576570",
+  appId: "1:833306576570:web:18122e2541d061e2912483",
+  measurementId: "G-3KE0Z8M5DD"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* =======================
+   UI要素
+======================= */
+const dummySource = document.getElementById("dummySource");
+const display = document.getElementById("display");
+const input = document.getElementById("input");
+const toggleBtn = document.getElementById("toggleBtn");
+const copyBtn = document.getElementById("copyBtn");
+const loginBtn = document.getElementById("loginBtn");
+const userLabel = document.getElementById("userLabel");
+
+/* =======================
+   ログイン
+======================= */
+let currentUser = null;
+
+loginBtn.onclick = async () => {
+  const provider = new GoogleAuthProvider();
+  await signInWithPopup(auth, provider);
+};
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return;
+  currentUser = user;
+  userLabel.textContent = user.email;
+  loginBtn.style.display = "none";
+  await loadFromCloud();
+});
+
+/* =======================
+   クラウド保存
+======================= */
+async function saveToCloud() {
+  if (!currentUser) return;
+  const ref = doc(db, "memos", currentUser.uid);
+  await setDoc(ref, {
+    real: input.value,
+    dummy: dummySource.value,
+    updated: Date.now()
+  });
+}
+
+async function loadFromCloud() {
+  const ref = doc(db, "memos", currentUser.uid);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    const data = snap.data();
+    input.value = data.real || "";
+    dummySource.value = data.dummy || "";
+    render(false);
+  }
+}
+
+/* =======================
+   ダミー表示ロジック
+======================= */
+const REVEAL_COUNT = 3;
+const REVEAL_TIME = 600;
+let revealTimer = null;
+let showReal = false;
+
+function buildDummyStream() {
+  const src = dummySource.value || "これは普通のメモです。";
+  const cleaned = src.replace(/\s+/g, "");
+  return cleaned.repeat(200);
+}
+
+function render(revealTail = false) {
+  const realText = input.value;
+  const len = realText.length;
+
+  if (showReal) {
+    display.value = realText;
+    return;
+  }
+
+  if (len === 0) {
+    display.value = "";
+    return;
+  }
+
+  const dummyStream = buildDummyStream();
+  let masked = dummyStream.slice(0, len);
+
+  if (revealTail) {
+    const n = Math.min(REVEAL_COUNT, len);
+    masked =
+      dummyStream.slice(0, len - n) +
+      realText.slice(len - n);
+  }
+
+  display.value = masked;
+}
+
+/* =======================
+   イベント
+======================= */
+input.addEventListener("input", () => {
+  render(true);
+  saveToCloud();
+
+  clearTimeout(revealTimer);
+  revealTimer = setTimeout(() => render(false), REVEAL_TIME);
+});
+
+input.addEventListener("scroll", () => {
+  display.scrollTop = input.scrollTop;
+});
+
+dummySource.addEventListener("input", () => {
+  render(false);
+  saveToCloud();
+});
+
+toggleBtn.onmousedown = () => {
+  showReal = true;
+  display.value = input.value;
+};
+toggleBtn.onmouseup = toggleBtn.onmouseleave = () => {
+  showReal = false;
+  render(false);
+};
+
+copyBtn.onclick = () => {
+  navigator.clipboard.writeText(input.value);
+};
+
+</script>
+
+</body>
+</html>
