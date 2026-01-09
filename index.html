@@ -99,6 +99,34 @@
     </div>
   </div>
 
+  <!-- ログイン案内ミニモーダル -->
+  <div id="loginGuideModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+
+    <div class="modal-panel" style="max-width:360px;">
+      <header class="modal-header">
+        <h2>ログインが必要です</h2>
+        <button id="closeLoginGuide">✕</button>
+      </header>
+
+      <section class="modal-body">
+        <p style="font-size:14px; line-height:1.6;">
+          設定を変更するにはログインが必要です。
+          <br>
+          Google アカウントでログインしてください。
+        </p>
+
+        <button
+          id="guideLoginBtn"
+          class="google-btn"
+          style="margin-top:12px; width:100%;">
+          Sign in with Google
+        </button>
+      </section>
+    </div>
+  </div>
+
+
   <!-- JS -->
   <script type="module" src="js/main.js"></script>
 
