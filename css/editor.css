@@ -34,6 +34,8 @@
 }
 
 .toolbar button {
+  width: 20px;
+  height: 20px;
   background: var(--accent);
   color: #fff;
   padding: 12px 14px;
@@ -50,6 +52,7 @@
 .editor-wrap {
   position: relative;
   flex: 1;
+  max-height: calc(100vh - 180px); /* 上部UI分を引く */
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--border-main);
@@ -75,4 +78,10 @@
   color: transparent;
   caret-color: var(--text-main);
   border: none;
+}
+
+@media (max-width: 600px) {
+  .editor-wrap {
+    max-height: calc(100vh - 220px);
+  }
 }
