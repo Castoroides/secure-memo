@@ -6,6 +6,10 @@
   <title>Secure Memo</title>
   <!-- favicon -->
   <link rel="icon" href="https://pbs.twimg.com/profile_images/1990063014457053185/J0CJwbSv_400x400.jpg">
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/editor.css" />
+  <link rel="stylesheet" href="css/modal.css" />
+  
 
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -15,143 +19,6 @@
   })(window,document,'script','dataLayer','GTM-TPKXSNK3');</script>
   <!-- End Google Tag Manager -->
 
-<style>
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  background: #f2f2f2;
-  height: 100dvh;
-}
-
-/* 全体 */
-.container {
-  max-width: 900px;
-  margin: 0 auto;
-  background: #fff;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  padding: 12px;
-}
-
-.google-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #fff;
-  color: #444;
-  border: 1px solid #ddd;
-  padding: 10px 14px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.google-btn svg {
-  width: 20px;
-  height: 20px;
-}
-
-/* ログインバー */
-.loginbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  font-size: 14px;
-}
-
-/* テキストエリア共通 */
-textarea {
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  padding: 14px;
-  font-size: 16px;   /* ← スマホ最適サイズ */
-  line-height: 1.7;
-  font-family: inherit;
-  resize: none;
-  overflow: auto;
-}
-
-/* ダミー元 */
-#dummySource {
-  height: 120px;
-  margin-bottom: 10px;
-}
-
-/* ツールバー */
-.toolbar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.toolbar button {
-  border: none;
-  background: #18a2bd;
-  color: #fff;
-  padding: 12px 14px;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 15px;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-}
-
-.toolbar button:active {
-  transform: scale(0.96);
-  background: #148aa2;
-}
-
-/* エディタ枠：画面下まで伸びる */
-.editor-wrap {
-  position: relative;
-  flex: 1;                /* ← これが重要 */
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid #ccc;
-  background: #fff;
-  min-height: 200px;
-}
-
-/* 表示用 */
-#display {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  border: none;
-  background: #fafafa;
-}
-
-/* 入力用 */
-#input {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  border: none;
-  background: transparent;
-  color: transparent;
-  caret-color: black;
-}
-
-/* =========================
-   💻 PCのときだけ中央寄せ＆余白
-========================= */
-@media (min-width: 900px) {
-  .container {
-    margin: 16px auto;
-    border-radius: 12px;
-    min-height: calc(100dvh - 32px);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-  }
-}
-</style>
 </head>
 <body>
   <!-- Google Tag Manager (noscript) -->
@@ -162,7 +29,7 @@ textarea {
 <div class="container">
 
   <div class="loginbar">
-    <div id="userLabel">ログインすることで、入力したデータを保持させることができます。（現在 未ログイン）</div>
+    <div id="userLabel">ログインすることで、入力したデータを保持させることができます。（現在未ログイン）</div>
     <button id="loginBtn" class="google-btn">
   <svg viewBox="0 0 48 48">
     <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.2l5.7-5.7C34.2 6.1 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.2-.4-3.5z"/>
@@ -174,12 +41,48 @@ textarea {
 </button>
   </div>
 
-  <textarea id="dummySource" placeholder="ダミー表示用テキスト"></textarea>
+<div class="toolbar">
+  <button id="toggleBtn">👁 表示</button>
+  <button id="copyBtn">📋 コピー</button>
+  <button id="settingsBtn">⚙ 設定</button>
+</div>
 
-  <div class="toolbar">
-    <button id="toggleBtn">👁 表示</button>
-    <button id="copyBtn">📋 コピー</button>
+<!-- 設定モーダル -->
+<div id="settingsModal" class="modal hidden">
+  <div class="modal-backdrop"></div>
+
+  <div class="modal-panel">
+    <header class="modal-header">
+      <h2>設定</h2>
+      <button id="closeSettings" aria-label="閉じる">✕</button>
+    </header>
+
+    <section class="modal-body">
+
+      <!-- （②で使う）テーマ設定：今は空でOK -->
+      <div class="setting-item">
+        <label>
+          テーマ
+          <select id="themeSelect">
+            <option value="light">ライト</option>
+            <option value="dark">ダーク</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- ★ ダミー入力をここに移動 -->
+      <div class="setting-item">
+        <label for="dummySource">ダミー表示用テキスト</label>
+        <textarea
+          id="dummySource"
+          placeholder="例：これは普通のメモです。"></textarea>
+      </div>
+
+    </section>
   </div>
+</div>
+
+
 
   <div class="editor-wrap">
     <textarea id="display" readonly></textarea>
@@ -188,160 +91,7 @@ textarea {
 
 </div>
 
-<!-- Firebase SDK -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-/* =======================
-   Firebase 設定（あなたの）
-======================= */
-const firebaseConfig = {
-  apiKey: "AIzaSyBPeOPcaf1WOsnbKA1I5FlrjAXm6tTkGy0",
-  authDomain: "memo-bycastoroides.firebaseapp.com",
-  projectId: "memo-bycastoroides",
-  storageBucket: "memo-bycastoroides.firebasestorage.app",
-  messagingSenderId: "833306576570",
-  appId: "1:833306576570:web:18122e2541d061e2912483",
-  measurementId: "G-3KE0Z8M5DD"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-/* =======================
-   UI要素
-======================= */
-const dummySource = document.getElementById("dummySource");
-const display = document.getElementById("display");
-const input = document.getElementById("input");
-const toggleBtn = document.getElementById("toggleBtn");
-const copyBtn = document.getElementById("copyBtn");
-const loginBtn = document.getElementById("loginBtn");
-const userLabel = document.getElementById("userLabel");
-
-/* =======================
-   ログイン
-======================= */
-let currentUser = null;
-
-loginBtn.onclick = async () => {
-  const provider = new GoogleAuthProvider();
-  await signInWithPopup(auth, provider);
-};
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) return;
-  currentUser = user;
-  userLabel.textContent = user.email;
-  loginBtn.style.display = "none";
-  await loadFromCloud();
-});
-
-/* =======================
-   クラウド保存
-======================= */
-async function saveToCloud() {
-  if (!currentUser) return;
-  const ref = doc(db, "memos", currentUser.uid);
-  await setDoc(ref, {
-    real: input.value,
-    dummy: dummySource.value,
-    updated: Date.now()
-  });
-}
-
-async function loadFromCloud() {
-  const ref = doc(db, "memos", currentUser.uid);
-  const snap = await getDoc(ref);
-  if (snap.exists()) {
-    const data = snap.data();
-    input.value = data.real || "";
-    dummySource.value = data.dummy || "";
-    render(false);
-  }
-}
-
-/* =======================
-   ダミー表示ロジック
-======================= */
-const REVEAL_COUNT = 3;
-const REVEAL_TIME = 600;
-let revealTimer = null;
-let showReal = false;
-
-function buildDummyStream() {
-  const src = dummySource.value || "これは普通のメモです。";
-  const cleaned = src.replace(/\s+/g, "");
-  return cleaned.repeat(200);
-}
-
-function render(revealTail = false) {
-  const realText = input.value;
-  const len = realText.length;
-
-  if (showReal) {
-    display.value = realText;
-    return;
-  }
-
-  if (len === 0) {
-    display.value = "";
-    return;
-  }
-
-  const dummyStream = buildDummyStream();
-  let masked = dummyStream.slice(0, len);
-
-  if (revealTail) {
-    const n = Math.min(REVEAL_COUNT, len);
-    masked =
-      dummyStream.slice(0, len - n) +
-      realText.slice(len - n);
-  }
-
-  display.value = masked;
-}
-
-/* =======================
-   イベント
-======================= */
-input.addEventListener("input", () => {
-  render(true);
-  saveToCloud();
-
-  clearTimeout(revealTimer);
-  revealTimer = setTimeout(() => render(false), REVEAL_TIME);
-});
-
-input.addEventListener("scroll", () => {
-  display.scrollTop = input.scrollTop;
-});
-
-dummySource.addEventListener("input", () => {
-  render(false);
-  saveToCloud();
-});
-
-toggleBtn.addEventListener("pointerdown", () => {
-  showReal = true;
-  display.value = input.value;
-});
-
-toggleBtn.addEventListener("pointerup", () => {
-  showReal = false;
-  render(false);
-});
-
-toggleBtn.addEventListener("pointerleave", () => {
-  showReal = false;
-  render(false);
-});
-
-
-</script>
+<script type="module" src="js/main.js"></script>
 
 </body>
 </html>
