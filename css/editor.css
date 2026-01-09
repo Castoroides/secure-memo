@@ -49,10 +49,17 @@
   filter: brightness(0.9);
 }
 
+/* 表示ボタン：長押し無効化 */
+#toggleBtn {
+  -webkit-user-select: none; /* iOS Safari */
+  user-select: none;
+  -webkit-touch-callout: none; /* 長押しメニュー禁止 */
+}
+
 .editor-wrap {
   position: relative;
   flex: 1;
-  max-height: calc(100vh - 180px); /* 上部UI分を引く */
+  max-height: calc(100vh - 300px); /* 上部UI分を引く */
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--border-main);
