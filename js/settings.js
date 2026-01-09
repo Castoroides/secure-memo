@@ -99,11 +99,6 @@ export function initSettings(initial = {}) {
 }
 
 // -----------------------------
-// トースト表示
-// -----------------------------
-import { showToast } from "./toast.js";
-
-// -----------------------------
 // 状態取得
 // -----------------------------
 export function getSettingsState() {
