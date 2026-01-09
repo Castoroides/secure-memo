@@ -92,9 +92,12 @@ initAuth({
     // 設定初期化
     initSettings(data?.settings || {});
 
-    // ログイン直後に設定モーダルを自動で開く
-    accountEmail.textContent = user.email;
-    settingsModal.classList.remove("hidden");
+    // フラグが立っていればログイン直後に設定モーダルを自動で開く
+    if (showSettingsAfterLogin) {
+      accountEmail.textContent = user.email;
+      settingsModal.classList.remove("hidden");
+      showSettingsAfterLogin = false; // フラグをリセット
+    }
 
     // 認証完了 → 表示
     document.body.style.visibility = "visible";

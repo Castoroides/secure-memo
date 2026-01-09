@@ -3,8 +3,8 @@
 // Settings UI & State
 // =======================================
 
-// settings.js
 import { login, logout, getCurrentUser } from "./auth.js";
+import { showToast } from "./toast.js";
 
 let settingsState = {
   theme: "light",
@@ -14,6 +14,9 @@ let settingsState = {
 // -----------------------------
 // 初期化
 // -----------------------------
+
+let showSettingsAfterLogin = false; // ログイン後、設定画面を表示するかのフラグ
+
 export function initSettings(initial = {}) {
   settingsState = {
     theme: initial.theme || "light",
@@ -89,6 +92,7 @@ export function initSettings(initial = {}) {
   });
 
   guideLoginBtn?.addEventListener("click", async () => {
+    showSettingsAfterLogin = true;
     loginGuideModal.classList.add("hidden");
     await login();
   });
