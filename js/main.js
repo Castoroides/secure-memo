@@ -93,8 +93,6 @@ initAuth({
     initSettings(data?.settings || {});
 
     // ログイン直後に設定モーダルを自動で開く
-    const settingsModal = document.getElementById("settingsModal");
-    const accountEmail = document.getElementById("accountEmail");
     accountEmail.textContent = user.email;
     settingsModal.classList.remove("hidden");
 
