@@ -5,7 +5,7 @@
 
 import {
   initAuth,
-  loginWithGoogle,
+  login,
   logout,
   getCurrentUser
 } from "./auth.js";
@@ -44,8 +44,8 @@ function closeModal(modal) {
 // ---------------------------------------
 // ログイン / ログアウト
 // ---------------------------------------
-loginBtn.addEventListener("click", loginWithGoogle);
-guideLoginBtn?.addEventListener("click", loginWithGoogle);
+loginBtn.addEventListener("click", login);
+guideLoginBtn?.addEventListener("click", login);
 logoutBtn?.addEventListener("click", logout);
 
 // ---------------------------------------
