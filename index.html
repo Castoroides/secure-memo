@@ -99,6 +99,14 @@ textarea {
   border-radius: 10px;
   cursor: pointer;
   font-size: 15px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.toolbar button:active {
+  transform: scale(0.96);
+  background: #148aa2;
 }
 
 /* エディタ枠：画面下まで伸びる */
@@ -317,18 +325,21 @@ dummySource.addEventListener("input", () => {
   saveToCloud();
 });
 
-toggleBtn.onmousedown = () => {
+toggleBtn.addEventListener("pointerdown", () => {
   showReal = true;
   display.value = input.value;
-};
-toggleBtn.onmouseup = toggleBtn.onmouseleave = () => {
+});
+
+toggleBtn.addEventListener("pointerup", () => {
   showReal = false;
   render(false);
-};
+});
 
-copyBtn.onclick = () => {
-  navigator.clipboard.writeText(input.value);
-};
+toggleBtn.addEventListener("pointerleave", () => {
+  showReal = false;
+  render(false);
+});
+
 
 </script>
 
