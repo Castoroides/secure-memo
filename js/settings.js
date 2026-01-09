@@ -104,3 +104,21 @@ export function initSettings(initial = {}) {
 export function getSettingsState() {
   return settingsState;
 }
+
+// -----------------------------
+// ログイン完了通知を受け取る
+// -----------------------------
+window.onLoginForSettings = () => {
+  if (!showSettingsAfterLogin) return;
+
+  const modal = document.getElementById("settingsModal");
+  const accountEmail = document.getElementById("accountEmail");
+  const user = getCurrentUser();
+
+  if (user) {
+    accountEmail.textContent = user.email;
+    modal.classList.remove("hidden");
+  }
+
+  showSettingsAfterLogin = false; // フラグリセット
+};

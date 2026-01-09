@@ -12,7 +12,7 @@ import {
 
 import { saveMemo, loadMemo } from "./storage.js";
 import { initEditor, getEditorState } from "./editor.js";
-import { initSettings, getSettingsState, showSettingsAfterLogin } from "./settings.js";
+import { initSettings, getSettingsState } from "./settings.js";
 
 // ---------------------------------------
 // DOM取得
