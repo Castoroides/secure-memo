@@ -114,7 +114,7 @@ toggleBtn?.addEventListener("pointerdown", () => {
 const copyBtn = document.getElementById("copyBtn");
 
 copyBtn?.addEventListener("click", async () => {
-  const text = display.value;
+  const text = state.real;
 
   if (!text) return;
 

@@ -91,6 +91,15 @@ initAuth({
 
     // 設定初期化
     initSettings(data?.settings || {});
+
+    // ログイン直後に設定モーダルを自動で開く
+    const settingsModal = document.getElementById("settingsModal");
+    const accountEmail = document.getElementById("accountEmail");
+    accountEmail.textContent = user.email;
+    settingsModal.classList.remove("hidden");
+
+    // 認証完了 → 表示
+    document.body.style.visibility = "visible";
   },
 
   onLogout() {
@@ -104,6 +113,9 @@ initAuth({
     // 初期化
     initEditor({ real: "", dummy: "" });
     initSettings({});
+
+    // 非表示
+    document.body.style.visibility = "visible";
   }
 });
 
