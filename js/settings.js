@@ -3,54 +3,64 @@
 // Settings UI & State
 // =======================================
 
-import { applyTheme } from "./theme.js";
+// settings.js
+import { login, logout } from "./auth.js";
 
-const modal = document.getElementById("settingsModal");
-const settingsBtn = document.getElementById("settingsBtn");
-const closeBtn = document.getElementById("closeSettings");
-const backdrop = modal?.querySelector(".modal-backdrop");
+const settingsModal = document.getElementById("settingsModal");
+const loginGuideModal = document.getElementById("loginGuideModal");
 
-const themeSelect = document.getElementById("themeSelect");
+export function initSettings() {
+  document.getElementById("settingsBtn").addEventListener("click", () => {
+    if (!window.currentUser) {
+      openLoginGuide();
+      return;
+    }
+    openSettings();
+  });
 
-const state = {
-  theme: "light"
-};
+  document.getElementById("closeSettings")
+    .addEventListener("click", closeSettings);
 
-export function initSettings(initial = {}) {
-  state.theme = initial.theme || "light";
+  settingsModal.querySelector(".modal-backdrop")
+    .addEventListener("click", closeSettings);
 
-  themeSelect.value = state.theme;
-  applyTheme(state.theme);
+  document.getElementById("closeLoginGuide")
+    .addEventListener("click", closeLoginGuide);
+
+  loginGuideModal.querySelector(".modal-backdrop")
+    .addEventListener("click", closeLoginGuide);
+
+  document.getElementById("guideLoginBtn")
+    .addEventListener("click", async () => {
+      await login();
+      closeLoginGuide();
+      openSettings(); // ログイン後に自動で設定を開く
+    });
+
+  document.getElementById("logoutBtn")
+    ?.addEventListener("click", async () => {
+      await logout();
+      closeSettings();
+    });
 }
 
-export function getSettingsState() {
-  return { ...state };
-}
+function openSettings() {
+  settingsModal.classList.remove("hidden");
 
-// ---------------------------------------
-// Events
-// ---------------------------------------
-
-settingsBtn?.addEventListener("click", () => {
-  modal.classList.remove("hidden");
-});
-
-closeBtn?.addEventListener("click", () => {
-  modal.classList.add("hidden");
-});
-
-backdrop?.addEventListener("click", () => {
-  modal.classList.add("hidden");
-});
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    modal.classList.add("hidden");
+  const emailEl = document.getElementById("accountEmail");
+  if (emailEl && window.currentUser) {
+    emailEl.textContent = window.currentUser.email;
   }
-});
+}
 
-themeSelect?.addEventListener("change", () => {
-  state.theme = themeSelect.value;
-  applyTheme(state.theme);
-  window.requestSave?.();
-});
+function closeSettings() {
+  settingsModal.classList.add("hidden");
+}
+
+function openLoginGuide() {
+  loginGuideModal.classList.remove("hidden");
+}
+
+function closeLoginGuide() {
+  loginGuideModal.classList.add("hidden");
+}
