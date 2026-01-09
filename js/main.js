@@ -97,6 +97,8 @@ initAuth({
 
     // 認証完了 → 表示
     document.body.style.visibility = "visible";
+
+    showToast("ログインしました");
   },
 
   onLogout() {
@@ -113,6 +115,8 @@ initAuth({
 
     // 非表示
     document.body.style.visibility = "visible";
+
+    showToast("ログアウトしました");
   }
 });
 
