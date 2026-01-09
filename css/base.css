@@ -1,0 +1,75 @@
+/* =========================
+   base.css
+   アプリ全体の土台・共通
+========================= */
+
+/* CSS変数（テーマの核） */
+:root {
+  --bg-page: #f2f2f2;
+  --bg-container: #ffffff;
+  --bg-editor: #fafafa;
+
+  --text-main: #000;
+  --border: #ccc;
+
+  --radius: 12px;
+  --font-size: 16px;
+  --line-height: 1.7;
+
+  --color-primary: #18a2bd;
+  --color-primary-active: #148aa2;
+}
+
+/* リセット */
+* {
+  box-sizing: border-box;
+}
+
+/* 全体 */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg-page);
+  color: var(--text-main);
+  height: 100dvh;
+}
+
+/* 共通コンテナ */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--bg-container);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+}
+
+/* 共通フォーム */
+textarea {
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  padding: 14px;
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  font-family: inherit;
+  resize: none;
+}
+
+/* 共通ボタン */
+button {
+  font-family: inherit;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+/* PC時の見た目調整 */
+@media (min-width: 900px) {
+  .container {
+    margin: 16px auto;
+    min-height: calc(100dvh - 32px);
+    border-radius: var(--radius);
+    box-shadow: 0 4px 16px rgba(0,0,0,.12);
+  }
+}

@@ -1,0 +1,86 @@
+/* =========================
+   editor.css
+   メイン画面（エディタ）
+========================= */
+
+/* ログインバー */
+.loginbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+/* Googleログインボタン */
+.google-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  color: #444;
+  border: 1px solid #ddd;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.google-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ツールバー */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.toolbar button {
+  border: none;
+  background: var(--color-primary);
+  color: #fff;
+  padding: 12px 14px;
+  font-size: 15px;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.toolbar button:active {
+  transform: scale(0.96);
+  background: var(--color-primary-active);
+}
+
+/* エディタ枠 */
+.editor-wrap {
+  position: relative;
+  flex: 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg-editor);
+  min-height: 200px;
+}
+
+/* 表示用 */
+#display {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border: none;
+  background: var(--bg-editor);
+}
+
+/* 入力用 */
+#input {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border: none;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--text-main);
+}
