@@ -7,59 +7,44 @@ import { auth } from "./firebase.js";
 import {
   GoogleAuthProvider,
   signInWithPopup,
-  signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-let currentUser = null;
+let currentUser; // undefined = 判定中
 
-// 🔑 ログイン
+// -----------------------------
+// 認証操作
+// -----------------------------
 export async function login() {
   const provider = new GoogleAuthProvider();
   await signInWithPopup(auth, provider);
 }
 
-// 🔑 ログアウト（アカウント変更）
 export async function logout() {
   await signOut(auth);
 }
 
-/**
- * 認証初期化
- * @param {Object} options
- * @param {(user: any) => void} options.onLogin
- * @param {() => void} options.onLogout
- */
-export function initAuth({ onLogin, onLogout } = {}) {
+// -----------------------------
+// 認証初期化
+// -----------------------------
+export function initAuth({ onLogin, onLogout, onReady } = {}) {
   onAuthStateChanged(auth, (user) => {
+    currentUser = user ?? null;
+
     if (user) {
-      currentUser = user;
       onLogin?.(user);
     } else {
-      currentUser = null;
       onLogout?.();
     }
+
+    onReady?.(currentUser);
   });
 }
 
-/**
- * Googleログイン
- */
-export async function loginWithGoogle() {
-  const provider = new GoogleAuthProvider();
-  await signInWithPopup(auth, provider);
-}
-
-/**
- * ログアウト（アカウント変更）
- */
-export async function logout() {
-  await signOut(auth);
-}
-
-/**
- * 現在のユーザー取得
- */
+// -----------------------------
+// 状態取得
+// -----------------------------
 export function getCurrentUser() {
   return currentUser;
 }

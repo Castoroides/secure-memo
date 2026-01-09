@@ -4,63 +4,97 @@
 // =======================================
 
 // settings.js
-import { login, logout } from "./auth.js";
+import { login, logout, getCurrentUser } from "./auth.js";
 
-const settingsModal = document.getElementById("settingsModal");
-const loginGuideModal = document.getElementById("loginGuideModal");
+let settingsState = {
+  theme: "light",
+  dummy: ""
+};
 
-export function initSettings() {
-  document.getElementById("settingsBtn").addEventListener("click", () => {
-    if (!window.currentUser) {
-      openLoginGuide();
-      return;
-    }
-    openSettings();
+// -----------------------------
+// 初期化
+// -----------------------------
+export function initSettings(initial = {}) {
+  settingsState = {
+    theme: initial.theme || "light",
+    dummy: initial.dummy || ""
+  };
+
+  const modal = document.getElementById("settingsModal");
+  const openBtn = document.getElementById("settingsBtn");
+  const closeBtn = document.getElementById("closeSettings");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  const themeSelect = document.getElementById("themeSelect");
+  const dummySource = document.getElementById("dummySource");
+  const accountEmail = document.getElementById("accountEmail");
+
+  const loginGuideModal = document.getElementById("loginGuideModal");
+  const closeLoginGuide = document.getElementById("closeLoginGuide");
+  const guideLoginBtn = document.getElementById("guideLoginBtn");
+
+  // UI反映
+  themeSelect.value = settingsState.theme;
+  dummySource.value = settingsState.dummy;
+
+  // -----------------------------
+  // 設定を開く
+  // -----------------------------
+  openBtn?.addEventListener("click", () => {
+    const user = getCurrentUser();
+
+  if (!user) {
+    loginGuideModal.classList.remove("hidden");
+    return;
+  }
+
+    accountEmail.textContent = user.email;
+    modal.classList.remove("hidden");
   });
 
-  document.getElementById("closeSettings")
-    .addEventListener("click", closeSettings);
+  // 閉じる
+  closeBtn?.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
 
-  settingsModal.querySelector(".modal-backdrop")
-    .addEventListener("click", closeSettings);
+  // -----------------------------
+  // ログアウト（アカウント変更）
+  // -----------------------------
+  logoutBtn?.addEventListener("click", async () => {
+    await logout();
+    modal.classList.add("hidden");
+  });
 
-  document.getElementById("closeLoginGuide")
-    .addEventListener("click", closeLoginGuide);
+  // -----------------------------
+  // 即時保存
+  // -----------------------------
+  themeSelect?.addEventListener("change", (e) => {
+    settingsState.theme = e.target.value;
+    document.documentElement.dataset.theme = settingsState.theme;
+    window.requestSave?.();
+  });
 
-  loginGuideModal.querySelector(".modal-backdrop")
-    .addEventListener("click", closeLoginGuide);
+  dummySource?.addEventListener("input", (e) => {
+    settingsState.dummy = e.target.value;
+    window.requestSave?.();
+  });
 
-  document.getElementById("guideLoginBtn")
-    .addEventListener("click", async () => {
-      await login();
-      closeLoginGuide();
-      openSettings(); // ログイン後に自動で設定を開く
-    });
+  // -----------------------------
+  // ログイン案内ミニモーダル
+  // -----------------------------
+  closeLoginGuide?.addEventListener("click", () => {
+    loginGuideModal.classList.add("hidden");
+  });
 
-  document.getElementById("logoutBtn")
-    ?.addEventListener("click", async () => {
-      await logout();
-      closeSettings();
-    });
+  guideLoginBtn?.addEventListener("click", async () => {
+    loginGuideModal.classList.add("hidden");
+    await login();
+  });
 }
 
-function openSettings() {
-  settingsModal.classList.remove("hidden");
-
-  const emailEl = document.getElementById("accountEmail");
-  if (emailEl && window.currentUser) {
-    emailEl.textContent = window.currentUser.email;
-  }
-}
-
-function closeSettings() {
-  settingsModal.classList.add("hidden");
-}
-
-function openLoginGuide() {
-  loginGuideModal.classList.remove("hidden");
-}
-
-function closeLoginGuide() {
-  loginGuideModal.classList.add("hidden");
+// -----------------------------
+// 状態取得
+// -----------------------------
+export function getSettingsState() {
+  return settingsState;
 }
