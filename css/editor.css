@@ -1,9 +1,7 @@
 /* =========================
    editor.css
-   メイン画面（エディタ）
 ========================= */
 
-/* ログインバー */
 .loginbar {
   display: flex;
   justify-content: space-between;
@@ -12,18 +10,16 @@
   font-size: 14px;
 }
 
-/* Googleログインボタン */
 .google-btn {
   display: flex;
   align-items: center;
   gap: 10px;
   background: #fff;
   color: #444;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-main);
   padding: 10px 14px;
   border-radius: 10px;
   cursor: pointer;
-  font-size: 14px;
 }
 
 .google-btn svg {
@@ -31,7 +27,6 @@
   height: 20px;
 }
 
-/* ツールバー */
 .toolbar {
   display: flex;
   gap: 10px;
@@ -39,48 +34,45 @@
 }
 
 .toolbar button {
-  border: none;
-  background: var(--color-primary);
+  background: var(--accent);
   color: #fff;
   padding: 12px 14px;
-  font-size: 15px;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
 }
 
 .toolbar button:active {
   transform: scale(0.96);
-  background: var(--color-primary-active);
+  filter: brightness(0.9);
 }
 
-/* エディタ枠 */
 .editor-wrap {
   position: relative;
   flex: 1;
-  border-radius: var(--radius);
+  border-radius: 12px;
   overflow: hidden;
-  border: 1px solid var(--border);
-  background: var(--bg-editor);
-  min-height: 200px;
-}
-
-/* 表示用 */
-#display {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  border: none;
+  border: 1px solid var(--border-main);
   background: var(--bg-editor);
 }
 
-/* 入力用 */
+#display,
 #input {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  padding: 14px;
+  resize: none;
+}
+
+#display {
+  z-index: 1;
   border: none;
+}
+
+#input {
+  z-index: 2;
   background: transparent;
   color: transparent;
   caret-color: var(--text-main);
+  border: none;
 }
