@@ -31,17 +31,14 @@ export function initAuth({ onLogin, onLogout } = {}) {
 
   // ログイン状態監視
   onAuthStateChanged(auth, (user) => {
-    currentUser = user || null;
-
     if (user) {
-      userLabel.textContent = user.email;
+      userLabel.textContent = "ログイン中";
+      accountEmail.textContent = user.email;
       loginBtn.style.display = "none";
-      onLogin?.(user);
     } else {
-      userLabel.textContent =
-        "ログインすることで、入力したデータを保持させることができます。（現在 未ログイン）";
-      loginBtn.style.display = "";
-      onLogout?.();
+      userLabel.textContent = "ログインしていません";
+      accountEmail.textContent = "ログインしていません";
+      loginBtn.style.display = "flex";
     }
   });
 }
@@ -52,3 +49,13 @@ export function initAuth({ onLogin, onLogout } = {}) {
 export function getCurrentUser() {
   return currentUser;
 }
+
+/**
+ * ログアウト＆アカウント変更
+ */
+import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+logoutBtn.onclick = async () => {
+  await signOut(auth);
+  location.reload(); // 状態リセット
+};
