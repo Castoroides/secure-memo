@@ -1,86 +1,105 @@
 // js/editor.js
-import { saveToStorage } from "./storage.js";
+// =======================================
+// Editor Logic (Dummy Mask)
+// =======================================
+
+const input = document.getElementById("input");
+const display = document.getElementById("display");
+const dummySource = document.getElementById("dummySource");
 
 const REVEAL_COUNT = 3;
 const REVEAL_TIME = 600;
 
-let input;
-let display;
-let dummySource;
 let revealTimer = null;
 let showReal = false;
 
-export function initEditor() {
-  input = document.getElementById("input");
-  display = document.getElementById("display");
-  dummySource = document.getElementById("dummySource");
+const state = {
+  real: "",
+  dummy: ""
+};
 
-  input.addEventListener("input", onInput);
-  input.addEventListener("scroll", syncScroll);
-
-  document.getElementById("toggleBtn").onclick = toggleView;
-  document.getElementById("copyBtn").onclick = copyText;
-}
-
-function onInput() {
-  render(true);
-  scheduleMask();
-  persist();
+function buildDummyStream() {
+  const src = state.dummy || "これは普通のメモです。";
+  const cleaned = src.replace(/\s+/g, "");
+  return cleaned.repeat(200);
 }
 
 function render(revealTail = false) {
+  const realText = state.real;
+  const len = realText.length;
+
   if (showReal) {
-    display.value = input.value;
+    display.value = realText;
     return;
   }
 
-  const len = input.value.length;
-  const dummyText =
-    (dummySource.value || "これは普通のメモです。").repeat(200);
+  if (!len) {
+    display.value = "";
+    return;
+  }
 
-  let masked = dummyText.slice(0, len);
+  const dummyStream = buildDummyStream();
+  let masked = dummyStream.slice(0, len);
 
-  if (revealTail && len >= REVEAL_COUNT) {
+  if (revealTail) {
+    const n = Math.min(REVEAL_COUNT, len);
     masked =
-      dummyText.slice(0, len - REVEAL_COUNT) +
-      input.value.slice(len - REVEAL_COUNT);
+      dummyStream.slice(0, len - n) +
+      realText.slice(len - n);
   }
 
   display.value = masked;
 }
 
-function scheduleMask() {
+export function initEditor(initial = {}) {
+  state.real = initial.real || "";
+  state.dummy = initial.dummy || "";
+
+  input.value = state.real;
+  dummySource.value = state.dummy;
+
+  render(false);
+}
+
+export function getEditorState() {
+  return { ...state };
+}
+
+// ---------------------------------------
+// Events
+// ---------------------------------------
+
+input.addEventListener("input", () => {
+  state.real = input.value;
+
+  render(true);
+  window.requestSave?.();
+
   clearTimeout(revealTimer);
   revealTimer = setTimeout(() => render(false), REVEAL_TIME);
-}
+});
 
-function toggleView() {
-  showReal = !showReal;
-  render(false);
-}
-
-function copyText() {
-  navigator.clipboard.writeText(input.value);
-}
-
-function syncScroll() {
+input.addEventListener("scroll", () => {
   display.scrollTop = input.scrollTop;
-}
+});
 
-function persist() {
-  saveToStorage({
-    real: input.value,
-    dummy: dummySource.value
-  });
-}
-
-/* 外部操作用 */
-
-export function setEditorContent(text) {
-  input.value = text;
+dummySource.addEventListener("input", () => {
+  state.dummy = dummySource.value;
   render(false);
-}
+  window.requestSave?.();
+});
 
-export function setDummySource(text) {
-  dummySource.value = text;
-}
+// 表示ボタン（押してる間だけ表示）
+const toggleBtn = document.getElementById("toggleBtn");
+
+toggleBtn?.addEventListener("pointerdown", () => {
+  showReal = true;
+  display.value = state.real;
+});
+
+["pointerup", "pointerleave"].forEach((ev) => {
+  toggleBtn?.addEventListener(ev, () => {
+    showReal = false;
+    render(false);
+  });
+});

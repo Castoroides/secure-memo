@@ -1,35 +1,56 @@
 // js/settings.js
-import { applyTheme } from "./theme.js";
-import { saveToStorage } from "./storage.js";
+// =======================================
+// Settings UI & State
+// =======================================
 
-export const settings = {
+import { applyTheme } from "./theme.js";
+
+const modal = document.getElementById("settingsModal");
+const settingsBtn = document.getElementById("settingsBtn");
+const closeBtn = document.getElementById("closeSettings");
+const backdrop = modal?.querySelector(".modal-backdrop");
+
+const themeSelect = document.getElementById("themeSelect");
+
+const state = {
   theme: "light"
 };
 
-export function initSettings() {
-  const modal = document.getElementById("settingsModal");
-  const openBtn = document.getElementById("settingsBtn");
-  const closeBtn = modal.querySelector(".close");
-  const backdrop = modal.querySelector(".modal-backdrop");
+export function initSettings(initial = {}) {
+  state.theme = initial.theme || "light";
 
-  openBtn.onclick = () => modal.classList.remove("hidden");
-  closeBtn.onclick = backdrop.onclick = () =>
+  themeSelect.value = state.theme;
+  applyTheme(state.theme);
+}
+
+export function getSettingsState() {
+  return { ...state };
+}
+
+// ---------------------------------------
+// Events
+// ---------------------------------------
+
+settingsBtn?.addEventListener("click", () => {
+  modal.classList.remove("hidden");
+});
+
+closeBtn?.addEventListener("click", () => {
+  modal.classList.add("hidden");
+});
+
+backdrop?.addEventListener("click", () => {
+  modal.classList.add("hidden");
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
     modal.classList.add("hidden");
+  }
+});
 
-  document.getElementById("themeSelect").onchange = (e) => {
-    settings.theme = e.target.value;
-    applyAllSettings();
-    persist();
-  };
-}
-
-export function applyAllSettings(loaded) {
-  if (loaded) Object.assign(settings, loaded);
-  applyTheme(settings.theme);
-}
-
-function persist() {
-  saveToStorage({
-    settings
-  });
-}
+themeSelect?.addEventListener("change", () => {
+  state.theme = themeSelect.value;
+  applyTheme(state.theme);
+  window.requestSave?.();
+});
