@@ -1,36 +1,54 @@
 // js/auth.js
+// =======================================
+// Firebase Authentication
+// =======================================
+
+import { auth } from "./firebase.js";
+
 import {
-  getAuth,
   GoogleAuthProvider,
   signInWithPopup,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-import { loadFromStorage } from "./storage.js";
-
 let currentUser = null;
 
-export function initAuth() {
-  const auth = getAuth();
+/**
+ * 認証初期化
+ * @param {Object} options
+ * @param {(user: any) => void} options.onLogin
+ * @param {() => void} options.onLogout
+ */
+export function initAuth({ onLogin, onLogout } = {}) {
   const loginBtn = document.getElementById("loginBtn");
   const userLabel = document.getElementById("userLabel");
 
-  loginBtn.onclick = async () => {
+  // ログインボタン
+  loginBtn?.addEventListener("click", async () => {
     const provider = new GoogleAuthProvider();
     await signInWithPopup(auth, provider);
-  };
+  });
 
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
+  // ログイン状態監視
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user || null;
 
-    currentUser = user;
-    userLabel.textContent = user.email;
-    loginBtn.style.display = "none";
-
-    await loadFromStorage(user.uid);
+    if (user) {
+      userLabel.textContent = user.email;
+      loginBtn.style.display = "none";
+      onLogin?.(user);
+    } else {
+      userLabel.textContent =
+        "ログインすることで、入力したデータを保持させることができます。（現在 未ログイン）";
+      loginBtn.style.display = "";
+      onLogout?.();
+    }
   });
 }
 
+/**
+ * 現在のユーザー取得
+ */
 export function getCurrentUser() {
   return currentUser;
 }

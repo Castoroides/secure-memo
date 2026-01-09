@@ -1,39 +1,46 @@
 // js/storage.js
+// =======================================
+// Firestore Storage
+// =======================================
+
+import { db } from "./firebase.js";
+
 import {
-  getFirestore,
   doc,
   setDoc,
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import { getCurrentUser } from "./auth.js";
-import { setEditorContent, setDummySource } from "./editor.js";
-import { applyAllSettings } from "./settings.js";
+/**
+ * メモ保存
+ * @param {string} uid
+ * @param {{
+ *   real: string,
+ *   dummy: string,
+ *   settings?: object
+ * }} data
+ */
+export async function saveMemo(uid, data) {
+  if (!uid) return;
 
-const db = getFirestore();
+  const ref = doc(db, "memos", uid);
 
-export async function saveToStorage(data) {
-  const user = getCurrentUser();
-
-  if (user) {
-    await setDoc(doc(db, "memos", user.uid), data);
-  } else {
-    localStorage.setItem("secureMemo", JSON.stringify(data));
-  }
+  await setDoc(ref, {
+    ...data,
+    updated: Date.now()
+  }, { merge: true });
 }
 
-export async function loadFromStorage(uid) {
-  if (uid) {
-    const snap = await getDoc(doc(db, "memos", uid));
-    if (snap.exists()) applyLoadedData(snap.data());
-  } else {
-    const raw = localStorage.getItem("secureMemo");
-    if (raw) applyLoadedData(JSON.parse(raw));
-  }
-}
+/**
+ * メモ読込
+ * @param {string} uid
+ * @returns {Promise<object|null>}
+ */
+export async function loadMemo(uid) {
+  if (!uid) return null;
 
-function applyLoadedData(data) {
-  if (data.real) setEditorContent(data.real);
-  if (data.dummy) setDummySource(data.dummy);
-  if (data.settings) applyAllSettings(data.settings);
+  const ref = doc(db, "memos", uid);
+  const snap = await getDoc(ref);
+
+  return snap.exists() ? snap.data() : null;
 }
