@@ -72,11 +72,13 @@ export function initSettings(initial = {}) {
     settingsState.theme = e.target.value;
     document.documentElement.dataset.theme = settingsState.theme;
     window.requestSave?.();
+    showToast("保存しました");
   });
 
   dummySource?.addEventListener("input", (e) => {
     settingsState.dummy = e.target.value;
     window.requestSave?.();
+    showToast("保存しました");
   });
 
   // -----------------------------
@@ -91,6 +93,11 @@ export function initSettings(initial = {}) {
     await login();
   });
 }
+
+// -----------------------------
+// トースト表示
+// -----------------------------
+import { showToast } from "./toast.js";
 
 // -----------------------------
 // 状態取得

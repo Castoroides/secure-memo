@@ -3,6 +3,8 @@
 // Editor Logic (Dummy Mask)
 // =======================================
 
+import { showToast } from "./toast.js";
+
 const input = document.getElementById("input");
 const display = document.getElementById("display");
 const dummySource = document.getElementById("dummySource");
@@ -89,7 +91,9 @@ dummySource.addEventListener("input", () => {
   window.requestSave?.();
 });
 
-// 表示ボタン（押してる間だけ表示）
+// ---------------------------------------
+// 表示ボタン処理
+// ---------------------------------------
 const toggleBtn = document.getElementById("toggleBtn");
 
 toggleBtn?.addEventListener("pointerdown", () => {
@@ -102,4 +106,22 @@ toggleBtn?.addEventListener("pointerdown", () => {
     showReal = false;
     render(false);
   });
+});
+
+// ---------------------------------------
+// コピー機能
+// ---------------------------------------
+const copyBtn = document.getElementById("copyBtn");
+
+copyBtn?.addEventListener("click", async () => {
+  const text = display.value;
+
+  if (!text) return;
+
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast("コピーしました");
+  } catch (e) {
+    showToast("コピーに失敗しました");
+  }
 });

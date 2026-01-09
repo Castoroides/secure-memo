@@ -74,7 +74,7 @@ closeLoginGuide?.addEventListener("click", () =>
 initAuth({
   async onLogin(user) {
     // UI更新
-    userLabel.textContent = "ログイン中";
+    userLabel.textContent = "自動保存有効";
     loginBtn.style.display = "none";
     accountEmail.textContent = user.email;
 
@@ -95,7 +95,7 @@ initAuth({
 
   onLogout() {
     // UI更新
-    userLabel.textContent = "ログインしていません";
+    userLabel.textContent = "ログインで自動保存機能が有効になります";
     loginBtn.style.display = "flex";
     accountEmail.textContent = "未ログイン";
 
