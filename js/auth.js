@@ -13,6 +13,17 @@ import {
 
 let currentUser = null;
 
+// 🔑 ログイン
+export async function login() {
+  const provider = new GoogleAuthProvider();
+  await signInWithPopup(auth, provider);
+}
+
+// 🔑 ログアウト（アカウント変更）
+export async function logout() {
+  await signOut(auth);
+}
+
 /**
  * 認証初期化
  * @param {Object} options
