@@ -13,6 +13,7 @@ import {
 import { saveMemo, loadMemo } from "./storage.js";
 import { initEditor, getEditorState } from "./editor.js";
 import { initSettings, getSettingsState } from "./settings.js";
+import { showToast } from "./toast.js";
 
 // ---------------------------------------
 // DOM取得
