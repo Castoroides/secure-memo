@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="default" data-color-mode="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Secure Memo</title>
   <!-- favicon -->
-  <link rel="icon" href="https://pbs.twimg.com/profile_images/1990063014457053185/J0CJwbSv_400x400.jpg">
+  <link rel="icon" href="assets/favicon.ico">
+
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/editor.css" />
   <link rel="stylesheet" href="css/modal.css" />
+  <link rel="stylesheet" href="css/notes.css" />
   
 
   <!-- Google Tag Manager -->
@@ -26,12 +28,46 @@
   height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- End Google Tag Manager (noscript) -->
 
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <button id="homeBtn" class="header-btn left">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        width="24"
+        height="24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M15 18l-6-6 6-6" />
+      </svg>
+      </button>
+      <div id="userLabel" class="left"></div>
+      <div class="header-right">
+        <span id="charCount" class="char-count">0字</span>
+        <button id="shareBtn" class="header-btn" data-icon="share" ></button>
+        <!-- Share Menu -->
+        <div id="shareMenu" class="share-menu hidden">
+          <button data-action="copyText">テキストをコピー</button>
+          <button data-action="copyLink">リンクをコピー</button>
+          <button data-action="shareX">Xへ投稿</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Floating view Button -->
+  <button id="viewBtn" class="floating-view" data-icon="view"></button>
+
   <div class="container">
 
     <!-- ログインバー -->
     <div class="loginbar">
-      <div id="userLabel"></div>
-
       <button id="loginBtn" class="google-btn">
         <svg viewBox="0 0 48 48">
           <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.2l5.7-5.7C34.2 6.1 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.2-.4-3.5z"/>
@@ -44,56 +80,211 @@
     </div>
 
     <!-- エディタ -->
-    <div class="editor-wrap">
-      <textarea id="display" readonly></textarea>
-      <textarea id="input"></textarea>
-    </div>
+    <div class="editor-paper">
+      <div class="editor-wrap">
+        <!-- 表示レイヤー（ダミー or リアル） -->
+        <div id="viewTitle" class="editor-view-title" aria-hidden="true"></div>
+        <div id="viewBody"  class="editor-view-body"  aria-hidden="true"></div>
 
-        <!-- ツールバー -->
-    <div class="toolbar">
-      <button id="toggleBtn">👁 表示</button>
-      <button id="copyBtn">📋 コピー</button>
-      <button id="settingsBtn">⚙ 設定</button>
+        <!-- 入力レイヤー（リアル） -->
+        <textarea id="realTitleInput" class="editor-input-title" rows="1" placeholder="タイトル"></textarea>
+        <textarea id="realBodyInput"  class="editor-input-body" placeholder="本文"></textarea>
+      </div>
     </div>
 
   </div>
 
-  <!-- 設定モーダル（container の外！） -->
-  <div id="settingsModal" class="modal hidden">
+    <!-- Notes Screen -->
+    <section id="notesScreen" class="screen hidden" aria-hidden="true">
+      <header class="screen-header">
+        <button id="notesBackBtn" class="icon-btn" type="button">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <h1 class="screen-title">メモ一覧</h1>
+        <button id="newMemoBtn" class="primary-btn" type="button">＋</button>
+      </header>
+
+      <div class="screen-body">
+        <div id="notesList" class="notes-list"></div>
+      </div>
+    </section>
+
+  <!-- 編集モーダル -->
+  <div id="editModal" class="modal hidden">
     <div class="modal-backdrop"></div>
 
     <div class="modal-panel">
       <header class="modal-header">
-        <h2>設定</h2>
-        <button id="closeSettings">✕</button>
+        <h2>編集</h2>
+        <button id="closeEdit" type="button">✕</button>
       </header>
 
-      <section class="modal-body">
-
+      <!-- ▼スクロール領域 -->
+      <section class="modal-body edit-modal-body">
         <div class="setting-item">
-          <label>ログイン中のアカウント</label>
-          <div id="accountEmail" class="account-email"></div>
-          <button id="logoutBtn" class="danger-btn">ログアウト</button>
-        </div>
-        
-        <div class="setting-item">
-          <label>
-            テーマ
-            <select id="themeSelect">
-              <option value="light">ライト</option>
-              <option value="dark">ダーク</option>
-            </select>
-          </label>
+          <label for="dummyTitleInput">ダミータイトル</label>
+          <input id="dummyTitleInput" type="text" placeholder="例：買い物メモ" />
         </div>
 
         <div class="setting-item">
-          <label for="dummySource">ダミー表示用テキスト</label>
-          <textarea
-            id="dummySource"
-            placeholder="例：これは普通のメモです。"></textarea>
+          <label for="dummyBodyInput">ダミー本文</label>
+          <textarea id="dummyBodyInput" placeholder="例：これは普通のメモです。"></textarea>
         </div>
-
       </section>
+
+      <!-- ▼固定フッター -->
+      <footer class="modal-footer edit-modal-footer">
+        <button id="saveEdit" class="primary-btn" type="button">
+          保存
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- 設定モーダル -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+
+    <div class="modal-panel modal-panel--settings">
+      <header class="modal-header">
+        <h2 class="modal-title">設定</h2>
+        <button id="closeSettings" class="icon-x" type="button" aria-label="閉じる">✕</button>
+      </header>
+
+      <!-- ▼スクロール領域 -->
+      <section class="modal-body settings-body">
+        <!-- Appearance -->
+        <div class="settings-section">
+          <div class="settings-section-title">表示</div>
+
+          <div class="settings-row">
+            <div class="settings-label">テーマ</div>
+            <div class="settings-control">
+              <select id="themeSelect">
+                <option value="default">default</option>
+                <option value="simple">simple</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">カラーモード</div>
+            <div class="settings-control">
+              <select id="colorModeSelect">
+                <option value="system">システム</option>
+                <option value="light">ライト</option>
+                <option value="dark">ダーク</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">文字サイズ</div>
+            <div class="settings-control">
+              <select id="fontSizeSelect">
+                <option value="14">小</option>
+                <option value="16">標準</option>
+                <option value="18">大</option>
+                <option value="20">特大</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">文字カウンター</div>
+            <div class="settings-control">
+              <select id="charCountSelect">
+                <option value="show">あり</option>
+                <option value="hide">なし</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy -->
+        <div class="settings-section">
+          <div class="settings-section-title">マスキング</div>
+
+          <div class="settings-row">
+            <div class="settings-label">ビューボタン</div>
+            <div class="settings-control">
+              <select id="viewModeSelect">
+                <option value="hold">長押し</option>
+                <option value="toggle">切り替え</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-row">
+            <div class="settings-label">入力中マスキング</div>
+            <div class="settings-control">
+              <select id="maskTimeSelect">
+                <option value="3000">3秒</option>
+                <option value="2000">2秒</option>
+                <option value="1000">1秒</option>
+                <option value="500">0.5秒</option>
+                <option value="300">0.3秒</option>
+                <option value="0">なし</option>
+              </select>
+            </div>
+          </div>
+
+          <p class="settings-help">
+            入力中に末尾だけ一瞬リアル文字を表示します（時間は上の設定）。
+          </p>
+        </div>
+
+        <!-- Account -->
+        <div class="settings-section">
+          <div class="settings-section-title">アカウント</div>
+
+          <div class="settings-row settings-row--stack">
+            <div class="settings-label">ログイン中</div>
+            <div class="settings-control">
+              <div id="accountEmail" class="account-email"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upgrade -->
+        <div class="settings-section">
+          <div class="settings-section-title">その他</div>
+
+          <div class="upgrade-card" id="simpleUpgrade">
+            <div class="upgrade-head">
+              <div class="upgrade-title">広告を非表示にする</div>
+              <div class="upgrade-badge">準備中</div>
+            </div>
+
+            <div class="simple-upgrade-banner">
+              <img src="assets/billing_banner.svg" alt="課金バナー" style="width:100%; height:auto;">
+            </div>
+
+            <!-- いずれ復活させるボタン領域 -->
+            <!--
+            <button class="simple-upgrade-btn" id="upgradeBtn">広告を消す</button>
+            <button class="simple-upgrade-restore" id="restorePurchaseBtn" type="button">購入を復元</button>
+            -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ▼固定フッター（危険操作はここへ） -->
+      <footer class="modal-footer settings-footer">
+        <button id="logoutBtn" class="danger-btn danger-btn--ghost" type="button">ログアウト</button>
+      </footer>
     </div>
   </div>
 
@@ -127,6 +318,22 @@
           Sign in with Google
         </button>
       </section>
+    </div>
+  </div>
+
+  <!-- 下部固定エリア -->
+  <div class="bottom-area">
+    <nav class="bottom-nav">
+      <button id="notesBtn" data-icon="notes"></button>
+      <button data-icon="community"></button>
+      <button id="editBtn" data-icon="edit"></button>
+      <button data-icon="notify"></button>
+      <button id="settingsBtn" data-icon="settings"></button>
+    </nav>
+
+    <!-- adsence -->
+    <div class="ad-slot">
+      <img src="assets/ad_dammy.svg" height="50" alt="広告">
     </div>
   </div>
 
