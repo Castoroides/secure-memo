@@ -224,3 +224,14 @@
   .screen-body{ padding-top: 18px; }
   .notes-list{ gap: 12px; }
 }
+
+body.show-notes .bottom-nav{
+  pointer-events: none;
+  opacity: 0.5; /* 任意 */
+}
+
+/* 広告だけは触れる（リンクなど） */
+body.show-notes .ad-slot{
+  pointer-events: auto;
+  opacity: 1;
+}
